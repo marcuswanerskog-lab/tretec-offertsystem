@@ -1,0 +1,95 @@
+# TRETEC LARM - OFFERTSYSTEM
+## Instruktioner
+
+### HUR DU ANVÄNDER SYSTEMET
+
+1. **Öppna offertsystem.html** i din webbläsare (Chrome, Firefox, Edge, Safari)
+   - Dubbelklicka på filen ELLER
+   - Högerklicka → "Öppna med" → Välj webbläsare
+
+2. **Steg 1: Kundinfo**
+   - Fyll i kundnamn (obligatoriskt)
+   - Lägg till kontaktuppgifter
+   - Ange eventuell rabatt% (0 = ingen rabatt)
+   - Klicka "Nästa: Välj Produkter"
+
+3. **Steg 2: Produkter**
+   - Klicka på kategorirubriker för att öppna produktlistor
+   - Använd sökfälten för att filtrera produkter
+   - Klicka på en produkt för att lägga till den
+   - Ändra antal i de valda produkterna
+   - Ta bort produkter med X-knappen
+   - Klicka "Nästa: Tjänster"
+
+4. **Steg 3: Tjänster**
+   - Fyll i belopp för:
+     * Kabeldragning
+     * Resor, Installation/montering, programmering, driftsättning
+     * Övrigt installationsmaterial
+     * Projektering, driftsättning, utbildning, dokumentation
+   - Lämna tomt om ej aktuellt
+   - Klicka "Nästa: Granska"
+
+5. **Steg 4: Sammanfattning**
+   - Granska all information
+   - Klicka "Generera PDF-Offert"
+
+### HUR DU UPPDATERAR PRODUKTER
+
+**Enkel uppdatering (manuellt):**
+
+1. Öppna `product_database.js` i en textredigerare (Notepad++, VS Code, etc.)
+2. Hitta rätt kategori (lasare, centralapparater, tillbehor)
+3. Lägg till nya produkter i JSON-format:
+```javascript
+{
+  "artikelnummer": "2-XXXX",
+  "e_nummer": "1234567",
+  "benamning": "Produktnamn",
+  "lagsta_orderantal": null,
+  "rabattgrupp": "V",
+  "pris": 5990
+}
+```
+4. Spara filen
+
+**Automatisk uppdatering (när du får ny prislista):**
+
+1. Ersätt `Prislista-2025_07_01.xlsx` med ny fil
+2. Kör Python-scriptet igen (kontakta mig för hjälp)
+
+### LÄGGA TILL ELLÅS-PRODUKTER
+
+När du får din ellås-prislista:
+
+1. Lägg till produkterna i `product_database.js` under kategorin "ellas"
+2. Produkterna kommer automatiskt att visas i Ellås-kategorin
+
+### FILER I SYSTEMET
+
+- **offertsystem.html** - Huvudfilen (öppna denna i webbläsare)
+- **app.js** - Programlogik
+- **product_database.js** - Alla produkter och priser
+- **Prislista-2025_07_01.xlsx** - Original prislista från Axema
+
+### KOMMANDE FUNKTIONER
+
+Systemet är redo att utökas med:
+- PDF-generering med er grafiska profil
+- Spara/ladda offerter
+- Export till Excel
+- E-post direkt till kund
+- Integration med fakturasystem
+
+### SUPPORT
+
+Kontakta Claude för:
+- Uppdatering av produktdatabas
+- Tillägg av PDF-generering
+- Anpassningar av design
+- Nya funktioner
+
+---
+
+**Version 1.0** - Januari 2026
+Utvecklad för Tretec Larm AB

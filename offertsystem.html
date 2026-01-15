@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tretec Larm - Offertsystem</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gold: #C9A227;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f5f5f5;
+            --text-dark: #333;
+            --border-color: #ddd;
+            --success-green: #4CAF50;
+            --error-red: #f44336;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #2d2d2d 100%);
+            color: white;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(201,162,39,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .gold-accent {
+            color: var(--primary-gold);
+            font-weight: 700;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: var(--light-bg);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border-color);
+            line-height: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: var(--primary-gold);
+            border-color: var(--primary-gold);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-number {
+            background: var(--success-green);
+            border-color: var(--success-green);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            color: var(--text-dark);
+            border-left: 4px solid var(--primary-gold);
+            padding-left: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95em;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(201,162,39,0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .product-category {
+            margin-bottom: 30px;
+        }
+
+        .category-header {
+            background: var(--light-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .category-header:hover {
+            background: #e8e8e8;
+        }
+
+        .category-header h3 {
+            font-size: 1.3em;
+            color: var(--text-dark);
+        }
+
+        .category-count {
+            background: var(--primary-gold);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .product-search {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .product-search input {
+            padding-left: 45px;
+            font-size: 1.05em;
+        }
+
+        .product-search::before {
+            content: '🔍';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+
+        .product-list {
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .product-list.active {
+            display: block;
+        }
+
+        .product-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-item:hover {
+            background: var(--light-bg);
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .product-meta {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .product-price {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--primary-gold);
+            margin-left: 20px;
+        }
+
+        .selected-products {
+            margin-top: 30px;
+        }
+
+        .selected-product {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr auto 150px 150px auto;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .selected-product:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .selected-product-name {
+            font-weight: 600;
+        }
+
+        .selected-product-article {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .quantity-input {
+            width: 100%;
+            text-align: center;
+        }
+
+        .product-total {
+            font-weight: 700;
+            color: var(--primary-gold);
+            text-align: right;
+        }
+
+        .remove-btn {
+            background: var(--error-red);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+        }
+
+        .summary {
+            background: var(--light-bg);
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .summary-total {
+            font-size: 1.5em;
+            color: var(--primary-gold);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 3px solid var(--primary-gold);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #b89320;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201,162,39,0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light-bg);
+            border-color: var(--text-dark);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .service-rows {
+            margin-top: 30px;
+        }
+
+        .service-row {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 20px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .service-label {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Produkt-hantering flik */
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-btn {
+            padding: 15px 30px;
+            background: var(--light-bg);
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            background: #e8e8e8;
+        }
+
+        .tab-btn.active:hover {
+            background: var(--primary-gold);
+        }
+
+        .product-management {
+            margin-top: 30px;
+        }
+
+        .product-management-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        .product-list-management {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .management-product-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .management-product-item:hover {
+            background: var(--light-bg);
+        }
+
+        .management-product-item.selected {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-gold);
+        }
+
+        .product-form {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .product-form h3 {
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .custom-products-notice {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .step-indicator {
+                flex-wrap: wrap;
+            }
+
+            .step {
+                flex-basis: 50%;
+                margin-bottom: 20px;
+            }
+
+            .selected-product {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-row {
+                grid-template-columns: 1fr;
+            }
+
+            .product-management-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="gold-accent">TRETEC</span> LARM AB</h1>
+            <div class="subtitle">Professionellt Offertsystem för Passersystem</div>
+        </div>
+
+        <!-- Tab buttons för olika vyer -->
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="showTab('quote')">📋 Skapa Offert</button>
+            <button class="tab-btn" onclick="showTab('manage')">⚙️ Hantera Produkter</button>
+        </div>
+
+        <!-- Offert-skapande vy -->
+        <div id="quoteTab" class="tab-content active">
+            <div class="step-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Kundinfo</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Produkter</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Tjänster</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Summering</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Step 1: Customer Info -->
+                <div class="section active" id="step1">
+                    <h2>Kundinformation</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="customerName">Kundnamn *</label>
+                            <input type="text" id="customerName" placeholder="T.ex. ICA Älgen" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="organizationNumber">Organisationsnummer</label>
+                            <input type="text" id="organizationNumber" placeholder="T.ex. 556123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerAddress">Leveransadress</label>
+                            <input type="text" id="customerAddress" placeholder="T.ex. Vargön">
+                        </div>
+                        <div class="form-group">
+                            <label for="billingAddress">Fakturaadress</label>
+                            <input type="text" id="billingAddress" placeholder="T.ex. Box 123, 123 45 Stockholm">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactPerson">Kontaktperson</label>
+                            <input type="text" id="contactPerson" placeholder="Namn">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">E-post</label>
+                            <input type="email" id="contactEmail" placeholder="kontakt@exempel.se">
+                        </div>
+                        <div class="form-group">
+                            <label for="billingEmail">Fakturamejl</label>
+                            <input type="email" id="billingEmail" placeholder="faktura@exempel.se">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactPhone">Telefon</label>
+                            <input type="tel" id="contactPhone" placeholder="070-123 45 67">
+                        </div>
+                        <div class="form-group">
+                            <label for="discount">Kundrabatt (%)</label>
+                            <input type="number" id="discount" placeholder="0" min="0" max="100" value="0">
+                            <small style="color: #666;">Större kund = högre rabatt</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="validityDays">Offertens giltighetstid (dagar)</label>
+                            <input type="number" id="validityDays" placeholder="30" min="1" value="30">
+                            <small style="color: #666;">Standard: 30 dagar</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDescription">Projektbeskrivning</label>
+                        <textarea id="projectDescription" placeholder="Beskriv projektet..."></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="nextStep()">Nästa: Välj Produkter →</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Products -->
+                <div class="section" id="step2">
+                    <h2>Välj Produkter</h2>
+                    
+                    <!-- Läsare -->
+                    <div class="product-category">
+                        <div class="category-header" onclick="toggleCategory('lasare')">
+                            <h3>📱 Läsare</h3>
+                            <span class="category-count" id="lasareCount">0 valda</span>
+                        </div>
+                        <div class="product-search">
+                            <input type="text" id="searchLasare" placeholder="Sök läsare..." onkeyup="searchProducts('lasare')">
+                        </div>
+                        <div class="product-list" id="lasareList"></div>
+                    </div>
+
+                    <!-- Dörrcentraler -->
+                    <div class="product-category">
+                        <div class="category-header" onclick="toggleCategory('centralapparater')">
+                            <h3>🔧 Dörrcentraler</h3>
+                            <span class="category-count" id="centralapparaterCount">0 valda</span>
+                        </div>
+                        <div class="product-search">
+                            <input type="text" id="searchCentralapparater" placeholder="Sök dörrcentraler..." onkeyup="searchProducts('centralapparater')">
+                        </div>
+                        <div class="product-list" id="centralapparaterList"></div>
+                    </div>
+
+                    <!-- Tillbehör -->
+                    <div class="product-category">
+                        <div class="category-header" onclick="toggleCategory('tillbehor')">
+                            <h3>🛠️ Tillbehör</h3>
+                            <span class="category-count" id="tillbehorCount">0 valda</span>
+                        </div>
+                        <div class="product-search">
+                            <input type="text" id="searchTillbehor" placeholder="Sök tillbehör..." onkeyup="searchProducts('tillbehor')">
+                        </div>
+                        <div class="product-list" id="tillbehorList"></div>
+                    </div>
+
+                    <!-- Ellås -->
+                    <div class="product-category">
+                        <div class="category-header" onclick="toggleCategory('ellas')">
+                            <h3>🔒 Ellås</h3>
+                            <span class="category-count" id="ellasCount">0 valda</span>
+                        </div>
+                        <div class="product-search">
+                            <input type="text" id="searchEllas" placeholder="Sök ellås..." onkeyup="searchProducts('ellas')">
+                        </div>
+                        <div class="product-list" id="ellasList"></div>
+                    </div>
+
+                    <!-- Egna produkter -->
+                    <div class="product-category">
+                        <div class="category-header" onclick="toggleCategory('custom')">
+                            <h3>➕ Egna Produkter</h3>
+                            <span class="category-count" id="customCount">0 valda</span>
+                        </div>
+                        <div class="product-list" id="customList"></div>
+                    </div>
+
+                    <div class="selected-products" id="selectedProducts">
+                        <h3 style="margin-bottom: 20px;">Valda Produkter</h3>
+                        <div id="selectedProductsList"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="prevStep()">← Tillbaka</button>
+                        <button class="btn btn-primary" onclick="nextStep()">Nästa: Tjänster →</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Services -->
+                <div class="section" id="step3">
+                    <h2>Tjänster & Installation</h2>
+                    <p style="margin-bottom: 20px; color: #666;">Ange timmar och á-pris (eller fritt belopp för övrigt material)</p>
+                    
+                    <div class="service-rows">
+                        <!-- Kabeldragning -->
+                        <div class="service-row" style="grid-template-columns: 1fr 120px 120px 150px;">
+                            <div class="service-label">Kabeldragning</div>
+                            <input type="number" id="service1_hours" placeholder="Timmar" min="0" value="8" class="service-input" onchange="calculateServiceTotal(1)">
+                            <input type="number" id="service1_rate" placeholder="á-pris" min="0" value="695" class="service-input" onchange="calculateServiceTotal(1)">
+                            <input type="number" id="service1_total" placeholder="Summa" min="0" class="service-input" readonly style="background: #f5f5f5; font-weight: 700;">
+                        </div>
+                        
+                        <!-- Resor/Installation -->
+                        <div class="service-row" style="grid-template-columns: 1fr 120px 120px 150px;">
+                            <div class="service-label">Resor, Installation/montering, programmering, driftsättning</div>
+                            <input type="number" id="service2_hours" placeholder="Timmar" min="0" class="service-input" onchange="calculateServiceTotal(2)">
+                            <input type="number" id="service2_rate" placeholder="á-pris" min="0" value="895" class="service-input" onchange="calculateServiceTotal(2)">
+                            <input type="number" id="service2_total" placeholder="Summa" min="0" value="0" class="service-input" readonly style="background: #f5f5f5; font-weight: 700;">
+                        </div>
+                        
+                        <!-- Övrigt material -->
+                        <div class="service-row">
+                            <div class="service-label">Övrigt installationsmaterial</div>
+                            <input type="number" id="service3" placeholder="Belopp (kr)" min="0" class="service-input" onchange="updateSummary()">
+                        </div>
+                        
+                        <!-- Projektering -->
+                        <div class="service-row" style="grid-template-columns: 1fr 120px 120px 150px;">
+                            <div class="service-label">Projektering, driftsättning, utbildning, dokumentation</div>
+                            <input type="number" id="service4_hours" placeholder="Timmar" min="0" class="service-input" onchange="calculateServiceTotal(4)">
+                            <input type="number" id="service4_rate" placeholder="á-pris" min="0" value="995" class="service-input" onchange="calculateServiceTotal(4)">
+                            <input type="number" id="service4_total" placeholder="Summa" min="0" class="service-input" readonly style="background: #f5f5f5; font-weight: 700;">
+                        </div>
+                    </div>
+
+                    <h2 style="margin-top: 40px;">Extra Rabatter</h2>
+                    <div class="service-rows">
+                        <div class="service-row">
+                            <div class="service-label">Fritext rabatt (t.ex. "40% rabatt på taggar")</div>
+                            <input type="text" id="extraDiscountText" placeholder="Beskrivning" style="grid-column: span 2;">
+                        </div>
+                        <div class="service-row">
+                            <div class="service-label">Rabattbelopp (minusbelopp)</div>
+                            <input type="number" id="extraDiscountAmount" placeholder="0" min="0" class="service-input" onchange="updateSummary()">
+                        </div>
+                    </div>
+
+                    <h2 style="margin-top: 40px;">Villkor & Inställningar</h2>
+                    
+                    <div class="form-group">
+                        <label for="customTerms">Projektspecifika villkor (valfritt)</label>
+                        <textarea id="customTerms" placeholder="T.ex. 'Systemet är lokalt och behöver kompletteras med B60 om det ska styras externt (ca 10.000kr). Låscylindrar återanvänds...'"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="advisor">Säkerhetsrådgivare</label>
+                        <select id="advisor">
+                            <option value="Marcus Wänerskog">Marcus Wänerskog - +46 (0) 761 999 555</option>
+                            <option value="Pekka Hakkarainen">Pekka Hakkarainen - +46 (0) 707 953 321</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="showServiceAgreement" checked>
+                            Visa serviceavtal i offerten
+                        </label>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="prevStep()">← Tillbaka</button>
+                        <button class="btn btn-primary" onclick="nextStep()">Nästa: Granska →</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Summary -->
+                <div class="section" id="step4">
+                    <h2>Sammanfattning & Generera Offert</h2>
+                    <div id="summaryContent"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="prevStep()">← Tillbaka</button>
+                        <button class="btn btn-primary" onclick="generatePDF()">📄 Generera PDF-Offert</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produkt-hantering vy -->
+        <div id="manageTab" class="tab-content">
+            <div class="content">
+                <h2>Hantera Produkt-databas</h2>
+                
+                <div class="custom-products-notice">
+                    <strong>Egna produkter:</strong> Produkter du lägger till här sparas lokalt i din webbläsare. 
+                    De finns kvar tills du rensar webbläsarens data.
+                </div>
+
+                <div class="product-management-grid">
+                    <!-- Produktlista -->
+                    <div>
+                        <h3>Välj produkt att redigera eller lägg till ny</h3>
+                        <div class="product-list-management" id="managementProductList">
+                            <div class="management-product-item" onclick="selectProductForEdit(null)">
+                                <strong>+ Lägg till ny produkt</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Produktformulär -->
+                    <div class="product-form">
+                        <h3 id="formTitle">Lägg till ny produkt</h3>
+                        
+                        <div class="form-group">
+                            <label for="productName">Produktnamn *</label>
+                            <input type="text" id="productName" placeholder="T.ex. Dörrstängare">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productArticle">Artikelnummer</label>
+                            <input type="text" id="productArticle" placeholder="T.ex. DÖRR-001">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productPrice">Pris (kr) *</label>
+                            <input type="number" id="productPrice" placeholder="1700" min="0" step="0.01">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productCategory">Kategori</label>
+                            <select id="productCategory">
+                                <option value="custom">Egen produkt</option>
+                                <option value="lasare">Läsare</option>
+                                <option value="centralapparater">Dörrcentraler</option>
+                                <option value="tillbehor">Tillbehör</option>
+                                <option value="ellas">Ellås</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productDescription">Beskrivning</label>
+                        </div>
+                        <textarea id="productDescription" placeholder="Valfri beskrivning..."></textarea>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="saveToDatabase">
+                            <label for="saveToDatabase">Spara permanent i databasen</label>
+                        </div>
+                        <small style="color: #666; display: block; margin-bottom: 20px;">
+                            Om ikryssad: Produkten finns kvar även efter webbläsare-stängning.<br>
+                            Om ej ikryssad: Produkten finns bara för denna session.
+                        </small>
+
+                        <div class="button-group" style="justify-content: flex-start;">
+                            <button class="btn btn-primary" onclick="saveProduct()">💾 Spara Produkt</button>
+                            <button class="btn btn-secondary" onclick="clearProductForm()">🗑️ Rensa</button>
+                            <button class="btn" style="background: #f44336; color: white;" onclick="deleteProduct()" id="deleteBtn" style="display: none;">🗑️ Ta bort</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="product_database.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Extended application state
+        let currentTab = 'quote';
+        let customProducts = JSON.parse(localStorage.getItem('customProducts') || '[]');
+        let editingProductId = null;
+
+        function showTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+
+            currentTab = tab;
+
+            if (tab === 'manage') {
+                loadManagementProducts();
+            }
+        }
+
+        function loadManagementProducts() {
+            const container = document.getElementById('managementProductList');
+            
+            // Clear existing
+            container.innerHTML = `
+                <div class="management-product-item" onclick="selectProductForEdit(null)">
+                    <strong>+ Lägg till ny produkt</strong>
+                </div>
+            `;
+
+            // Add custom products
+            customProducts.forEach((product, index) => {
+                const item = document.createElement('div');
+                item.className = 'management-product-item';
+                item.onclick = () => selectProductForEdit(product.id);
+                item.innerHTML = `
+                    <div>
+                        <strong>${product.benamning}</strong><br>
+                        <small>${product.artikelnummer || 'Inget art.nr'} | ${product.pris} kr</small>
+                    </div>
+                    <div style="color: #666; font-size: 0.8em;">
+                        ${product.category === 'custom' ? 'Egen' : product.category}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            // Add main database products (first 50 for management)
+            let count = 0;
+            Object.keys(PRODUCT_DB).forEach(category => {
+                if (count >= 50) return;
+                PRODUCT_DB[category].forEach(product => {
+                    if (count >= 50) return;
+                    const item = document.createElement('div');
+                    item.className = 'management-product-item';
+                    item.onclick = () => selectProductForEdit('db_' + category + '_' + product.artikelnummer);
+                    item.innerHTML = `
+                        <div>
+                            <strong>${product.benamning}</strong><br>
+                            <small>${product.artikelnummer} | ${product.pris} kr</small>
+                        </div>
+                        <div style="color: #666; font-size: 0.8em;">
+                            ${category}
+                        </div>
+                    `;
+                    container.appendChild(item);
+                    count++;
+                });
+            });
+        }
+
+        function selectProductForEdit(productId) {
+            editingProductId = productId;
+            
+            if (!productId) {
+                // New product
+                clearProductForm();
+                document.getElementById('formTitle').textContent = 'Lägg till ny produkt';
+                document.getElementById('deleteBtn').style.display = 'none';
+                return;
+            }
+
+            let product = null;
+            
+            // Check custom products
+            if (typeof productId === 'string' && !productId.startsWith('db_')) {
+                product = customProducts.find(p => p.id === productId);
+            } else if (productId.startsWith('db_')) {
+                // Database product
+                const parts = productId.split('_');
+                const category = parts[1];
+                const artikelnummer = parts.slice(2).join('_');
+                const categoryProducts = PRODUCT_DB[category];
+                if (categoryProducts) {
+                    product = categoryProducts.find(p => p.artikelnummer === artikelnummer);
+                }
+            }
+
+            if (product) {
+                document.getElementById('productName').value = product.benamning || '';
+                document.getElementById('productArticle').value = product.artikelnummer || '';
+                document.getElementById('productPrice').value = product.pris || '';
+                document.getElementById('productCategory').value = product.category || 'custom';
+                document.getElementById('productDescription').value = product.description || '';
+                
+                document.getElementById('formTitle').textContent = 'Redigera produkt';
+                document.getElementById('deleteBtn').style.display = typeof productId === 'string' && !productId.startsWith('db_') ? 'inline-block' : 'none';
+                
+                // Can't save database products permanently
+                if (productId.startsWith('db_')) {
+                    document.getElementById('saveToDatabase').checked = false;
+                    document.getElementById('saveToDatabase').disabled = true;
+                } else {
+                    document.getElementById('saveToDatabase').disabled = false;
+                }
+            }
+        }
+
+        function saveProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const article = document.getElementById('productArticle').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const description = document.getElementById('productDescription').value.trim();
+            const savePermanent = document.getElementById('saveToDatabase').checked;
+
+            if (!name || !price) {
+                alert('Produktnamn och pris är obligatoriska!');
+                return;
+            }
+
+            const product = {
+                id: editingProductId || Date.now().toString(),
+                benamning: name,
+                artikelnummer: article,
+                pris: price,
+                category: category,
+                description: description,
+                custom: true
+            };
+
+            if (editingProductId && typeof editingProductId === 'string' && !editingProductId.startsWith('db_')) {
+                // Update existing custom product
+                const index = customProducts.findIndex(p => p.id === editingProductId);
+                if (index !== -1) {
+                    customProducts[index] = product;
+                }
+            } else {
+                // Add new product
+                customProducts.push(product);
+            }
+
+            // Save to localStorage if permanent
+            if (savePermanent) {
+                localStorage.setItem('customProducts', JSON.stringify(customProducts));
+            }
+
+            // Reload products and management
+            loadCustomProducts();
+            loadManagementProducts();
+            clearProductForm();
+            
+            alert('Produkt sparad!');
+        }
+
+        function deleteProduct() {
+            if (!editingProductId || confirm('Är du säker på att du vill ta bort denna produkt?')) {
+                customProducts = customProducts.filter(p => p.id !== editingProductId);
+                localStorage.setItem('customProducts', JSON.stringify(customProducts));
+                
+                loadCustomProducts();
+                loadManagementProducts();
+                clearProductForm();
+            }
+        }
+
+        function clearProductForm() {
+            document.getElementById('productName').value = '';
+            document.getElementById('productArticle').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productCategory').value = 'custom';
+            document.getElementById('productDescription').value = '';
+            document.getElementById('saveToDatabase').checked = false;
+            document.getElementById('saveToDatabase').disabled = false;
+            editingProductId = null;
+            document.getElementById('formTitle').textContent = 'Lägg till ny produkt';
+            document.getElementById('deleteBtn').style.display = 'none';
+        }
+
+        function loadCustomProducts() {
+            // Add custom products to PRODUCT_DB for the session
+            PRODUCT_DB.custom = customProducts;
+            
+            // Reload category counts and lists
+            const customList = document.getElementById('customList');
+            customList.innerHTML = '';
+            
+            customProducts.forEach(product => {
+                const item = createProductItem(product, 'custom');
+                customList.appendChild(item);
+            });
+            
+            updateCategoryCount('custom');
+        }
+
+        // Load custom products on startup
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCustomProducts();
+        });
+
+        // Extended quote data to include new fields
+        let quoteData = {
+            customer: {},
+            products: [],
+            services: [],
+            discount: 0
+        };
+
+        // Update nextStep to include new fields
+        function nextStep() {
+            // Validation
+            if (currentStep === 1) {
+                const customerName = document.getElementById('customerName').value.trim();
+                if (!customerName) {
+                    alert('Vänligen ange kundnamn');
+                    return;
+                }
+                
+                // Save customer data with new fields
+                quoteData.customer = {
+                    name: customerName,
+                    organizationNumber: document.getElementById('organizationNumber').value.trim(),
+                    address: document.getElementById('customerAddress').value.trim(),
+                    billingAddress: document.getElementById('billingAddress').value.trim(),
+                    contact: document.getElementById('contactPerson').value.trim(),
+                    email: document.getElementById('contactEmail').value.trim(),
+                    billingEmail: document.getElementById('billingEmail').value.trim(),
+                    phone: document.getElementById('contactPhone').value.trim(),
+                };
+                quoteData.discount = parseFloat(document.getElementById('discount').value) || 0;
+                quoteData.validityDays = parseInt(document.getElementById('validityDays').value) || 30;
+            }
+            
+            if (currentStep === 2) {
+                quoteData.products = selectedProducts;
+            }
+            
+            if (currentStep === 3) {
+                // Save services with new calculation format
+                const service1Total = parseFloat(document.getElementById('service1_total')?.value) || 0;
+                const service2Total = parseFloat(document.getElementById('service2_total')?.value) || 0;
+                const service3Amount = parseFloat(document.getElementById('service3')?.value) || 0;
+                const service4Total = parseFloat(document.getElementById('service4_total')?.value) || 0;
+                
+                quoteData.services = [
+                    { 
+                        name: 'Kabeldragning', 
+                        amount: service1Total,
+                        hours: parseFloat(document.getElementById('service1_hours')?.value) || 0,
+                        rate: parseFloat(document.getElementById('service1_rate')?.value) || 0
+                    },
+                    { 
+                        name: 'Resor, Installation/montering, programmering, driftsättning', 
+                        amount: service2Total,
+                        hours: parseFloat(document.getElementById('service2_hours')?.value) || 0,
+                        rate: parseFloat(document.getElementById('service2_rate')?.value) || 0
+                    },
+                    { 
+                        name: 'Övrigt installationsmaterial', 
+                        amount: service3Amount 
+                    },
+                    { 
+                        name: 'Projektering, driftsättning, utbildning, dokumentation', 
+                        amount: service4Total,
+                        hours: parseFloat(document.getElementById('service4_hours')?.value) || 0,
+                        rate: parseFloat(document.getElementById('service4_rate')?.value) || 0
+                    }
+                ];
+                
+                // Save extra discount
+                quoteData.extra_discount = {
+                    text: document.getElementById('extraDiscountText')?.value.trim() || '',
+                    amount: parseFloat(document.getElementById('extraDiscountAmount')?.value) || 0
+                };
+                
+                // Save settings
+                quoteData.custom_terms = document.getElementById('customTerms').value.trim();
+                quoteData.advisor = document.getElementById('advisor').value;
+                quoteData.show_service_agreement = document.getElementById('showServiceAgreement').checked;
+                
+                // Generate summary
+                generateSummary();
+            }
+            
+            if (currentStep < 4) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+    </script>
+</body>
+</html>

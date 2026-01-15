@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tretec Larm - Offertsystem V3.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gold: #C9A227;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f5f5f5;
+            --text-dark: #333;
+            --border-color: #ddd;
+            --success-green: #4CAF50;
+            --error-red: #f44336;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #2d2d2d 100%);
+            color: white;
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: var(--primary-gold);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #b8911f;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.secondary {
+            background: #666;
+        }
+
+        .nav-btn.secondary:hover {
+            background: #555;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #b8911f 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        /* Form Styles */
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        .form-section h2 {
+            color: var(--dark-bg);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-gold);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 1.05em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group input[type="number"] {
+            max-width: 200px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #b8911f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201,162,39,0.3);
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-danger {
+            background: var(--error-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #da190b;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th {
+            background: var(--dark-bg);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1em;
+        }
+
+        .data-table tr:hover {
+            background: var(--light-bg);
+        }
+
+        .data-table .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn.edit {
+            background: #2196F3;
+            color: white;
+        }
+
+        .icon-btn.edit:hover {
+            background: #1976D2;
+        }
+
+        .icon-btn.delete {
+            background: var(--error-red);
+            color: white;
+        }
+
+        .icon-btn.delete:hover {
+            background: #da190b;
+        }
+
+        .icon-btn.view {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .icon-btn.view:hover {
+            background: #45a049;
+        }
+
+        /* Search & Filter */
+        .search-bar {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-close {
+            background: var(--error-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .modal-close:hover {
+            background: #da190b;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            font-size: 1.05em;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Product Selection */
+        .category-section {
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .category-header:hover {
+            background: #2d2d2d;
+        }
+
+        .category-content {
+            display: none;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .category-content.open {
+            display: block;
+        }
+
+        .product-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-item:hover {
+            background: var(--light-bg);
+            border-color: var(--primary-gold);
+        }
+
+        .product-item.selected {
+            background: #d4edda;
+            border-color: var(--success-green);
+        }
+
+        .selected-products {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .selected-product {
+            background: white;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .selected-product input {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .remove-btn {
+            background: var(--error-red);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .remove-btn:hover {
+            background: #da190b;
+        }
+
+        /* Summary Section */
+        .summary-box {
+            background: var(--light-bg);
+            padding: 30px;
+            border-radius: 8px;
+            border: 3px solid var(--primary-gold);
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1em;
+        }
+
+        .summary-line.total {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary-gold);
+            border-bottom: none;
+            margin-top: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .selected-product {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .data-table {
+                font-size: 0.9em;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1>🔒 Tretec Larm AB</h1>
+                <p>Offertsystem V3.0 - Komplett CRM & Avtalslösning</p>
+            </div>
+            <div class="header-nav">
+                <button class="nav-btn" onclick="showView('dashboard')">Dashboard</button>
+                <button class="nav-btn secondary" onclick="showView('customers')">Kunder</button>
+                <button class="nav-btn secondary" onclick="showView('products')">Produkter</button>
+                <button class="nav-btn secondary" onclick="showView('quotes')">Offerter</button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <div id="alertContainer"></div>
+
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard" class="view active">
+                <h2 style="margin-bottom: 30px; font-size: 2em;">📊 Dashboard</h2>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card" onclick="createNewQuote()">
+                        <h3>✨ Skapa ny offert</h3>
+                        <p>Starta en ny offertprocess med kundinfo, produktval och villkor</p>
+                    </div>
+                    <div class="dashboard-card" onclick="showView('quotes')">
+                        <h3>📋 Visa offerter</h3>
+                        <p>Se alla skapade offerter och deras status</p>
+                    </div>
+                    <div class="dashboard-card" onclick="showView('customers')">
+                        <h3>👥 Kundregister</h3>
+                        <p>Hantera kunduppgifter och kontaktinformation</p>
+                    </div>
+                    <div class="dashboard-card" onclick="showView('products')">
+                        <h3>📦 Produktdatabas</h3>
+                        <p>Lägg till, redigera och hantera produkter</p>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>📈 Statistik</h2>
+                    <div class="dashboard-grid">
+                        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px;">Antal offerter</h4>
+                            <p style="font-size: 2em; font-weight: 700; color: #1976d2;" id="statsQuotes">0</p>
+                        </div>
+                        <div style="background: #f3e5f5; padding: 20px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px;">Antal kunder</h4>
+                            <p style="font-size: 2em; font-weight: 700; color: #7b1fa2;" id="statsCustomers">0</p>
+                        </div>
+                        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px;">Antal produkter</h4>
+                            <p style="font-size: 2em; font-weight: 700; color: #388e3c;" id="statsProducts">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CUSTOMER VIEW -->
+            <div id="customers" class="view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="font-size: 2em;">👥 Kundregister</h2>
+                    <button class="btn btn-primary" onclick="openCustomerModal()">+ Lägg till kund</button>
+                </div>
+
+                <input type="text" class="search-bar" id="customerSearch" placeholder="Sök kunder (namn, orgnr, kundnummer)..." oninput="filterCustomers()">
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Kundnummer</th>
+                            <th>Företagsnamn</th>
+                            <th>Org.nr</th>
+                            <th>Kontakt</th>
+                            <th>Telefon</th>
+                            <th>E-post</th>
+                            <th>Åtgärder</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PRODUCT VIEW -->
+            <div id="products" class="view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="font-size: 2em;">📦 Produktdatabas</h2>
+                    <button class="btn btn-primary" onclick="openProductModal()">+ Lägg till produkt</button>
+                </div>
+
+                <input type="text" class="search-bar" id="productSearch" placeholder="Sök produkter (namn, artikelnr, kategori)..." oninput="filterProducts()">
+
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: 600; margin-right: 10px;">Filtrera kategori:</label>
+                    <select id="categoryFilter" onchange="filterProducts()" style="padding: 10px; font-size: 1em; border-radius: 6px;">
+                        <option value="">Alla kategorier</option>
+                    </select>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Artikelnr</th>
+                            <th>Benämning</th>
+                            <th>Kategori</th>
+                            <th>Pris (kr)</th>
+                            <th>Leverantör</th>
+                            <th>Åtgärder</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- QUOTES VIEW -->
+            <div id="quotes" class="view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="font-size: 2em;">📋 Offerter</h2>
+                    <button class="btn btn-primary" onclick="createNewQuote()">+ Skapa ny offert</button>
+                </div>
+
+                <input type="text" class="search-bar" id="quoteSearch" placeholder="Sök offerter (kundnamn, offertnummer)..." oninput="filterQuotes()">
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Offertnr</th>
+                            <th>Datum</th>
+                            <th>Kund</th>
+                            <th>Totalt belopp</th>
+                            <th>Status</th>
+                            <th>Åtgärder</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quoteTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- NEW QUOTE VIEW -->
+            <div id="newQuote" class="view">
+                <h2 style="margin-bottom: 30px; font-size: 2em;">✨ Skapa ny offert</h2>
+                
+                <!-- Step indicator -->
+                <div style="display: flex; justify-content: space-between; margin-bottom: 40px; padding: 20px; background: var(--light-bg); border-radius: 8px;">
+                    <div class="quote-step active" id="stepInd1">
+                        <strong>1. Kundinfo</strong>
+                    </div>
+                    <div class="quote-step" id="stepInd2">
+                        <strong>2. Produkter</strong>
+                    </div>
+                    <div class="quote-step" id="stepInd3">
+                        <strong>3. Tjänster</strong>
+                    </div>
+                    <div class="quote-step" id="stepInd4">
+                        <strong>4. Villkor</strong>
+                    </div>
+                    <div class="quote-step" id="stepInd5">
+                        <strong>5. Sammanfattning</strong>
+                    </div>
+                </div>
+
+                <!-- Step 1: Customer Info -->
+                <div id="quoteStep1" class="quote-step-content">
+                    <div class="form-section">
+                        <h2>1️⃣ Kunduppgifter</h2>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Sök befintlig kund (Org.nr eller namn)</label>
+                                <input type="text" id="customerLookup" placeholder="Börja skriva..." onkeyup="searchCustomers()">
+                                <div id="customerSuggestions" style="border: 1px solid #ddd; display: none; max-height: 200px; overflow-y: auto; margin-top: 5px;"></div>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--border-color);">
+
+                        <h3 style="margin-bottom: 20px;">ELLER fyll i manuellt:</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kundnummer *</label>
+                                <input type="text" id="quoteCustomerNumber" placeholder="Genereras automatiskt" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Företagsnamn *</label>
+                                <input type="text" id="quoteCustomerName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Organisationsnummer *</label>
+                                <input type="text" id="quoteCustomerOrg" placeholder="XXXXXX-XXXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Kontaktperson</label>
+                                <input type="text" id="quoteCustomerContact">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Telefon</label>
+                                <input type="tel" id="quoteCustomerPhone">
+                            </div>
+                            <div class="form-group">
+                                <label>E-post</label>
+                                <input type="email" id="quoteCustomerEmail">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Adress</label>
+                                <input type="text" id="quoteCustomerAddress">
+                            </div>
+                            <div class="form-group">
+                                <label>Postnummer</label>
+                                <input type="text" id="quoteCustomerZip">
+                            </div>
+                            <div class="form-group">
+                                <label>Ort</label>
+                                <input type="text" id="quoteCustomerCity">
+                            </div>
+                        </div>
+
+                        <h3 style="margin: 30px 0 20px;">Fakturauppgifter (om annan än ovan)</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fakturaadress</label>
+                                <input type="text" id="quoteInvoiceAddress">
+                            </div>
+                            <div class="form-group">
+                                <label>Fakturareferens / PAL nr</label>
+                                <input type="text" id="quoteInvoiceRef">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>E-faktura GLN</label>
+                                <input type="text" id="quoteInvoiceGLN">
+                            </div>
+                            <div class="form-group">
+                                <label>PDF-faktura e-post</label>
+                                <input type="email" id="quoteInvoicePDF">
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <button class="btn btn-primary" onclick="goToQuoteStep(2)">Nästa: Välj Produkter →</button>
+                            <button class="btn btn-secondary" onclick="showView('dashboard')">Avbryt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Products -->
+                <div id="quoteStep2" class="quote-step-content" style="display: none;">
+                    <div class="form-section">
+                        <h2>2️⃣ Välj produkter</h2>
+                        
+                        <input type="text" class="search-bar" id="quoteProductSearch" placeholder="Sök produkter..." oninput="filterQuoteProducts()">
+
+                        <div id="productCategories">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <div class="selected-products" id="selectedProductsList">
+                            <h3>Valda produkter</h3>
+                            <div id="selectedProductsContainer">
+                                <p>Inga produkter valda än</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <button class="btn btn-primary" onclick="goToQuoteStep(3)">Nästa: Tjänster →</button>
+                            <button class="btn btn-secondary" onclick="goToQuoteStep(1)">← Tillbaka</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Services -->
+                <div id="quoteStep3" class="quote-step-content" style="display: none;">
+                    <div class="form-section">
+                        <h2>3️⃣ Tjänster & Installation</h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kabeldragning (timmar)</label>
+                                <input type="number" id="serviceCableHours" value="8" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>á-pris (kr/tim)</label>
+                                <input type="number" id="serviceCableRate" value="695" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Summa (kr)</label>
+                                <input type="number" id="serviceCableTotal" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Resor, Installation/montering (timmar)</label>
+                                <input type="number" id="serviceInstallHours" value="0" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>á-pris (kr/tim)</label>
+                                <input type="number" id="serviceInstallRate" value="895" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Summa (kr)</label>
+                                <input type="number" id="serviceInstallTotal" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Projektering, utbildning (timmar)</label>
+                                <input type="number" id="serviceProjectHours" value="0" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>á-pris (kr/tim)</label>
+                                <input type="number" id="serviceProjectRate" value="995" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Summa (kr)</label>
+                                <input type="number" id="serviceProjectTotal" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Övrigt installationsmaterial (kr)</label>
+                            <input type="number" id="serviceOtherCost" value="0" min="0">
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <button class="btn btn-primary" onclick="goToQuoteStep(4)">Nästa: Villkor →</button>
+                            <button class="btn btn-secondary" onclick="goToQuoteStep(2)">← Tillbaka</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Terms -->
+                <div id="quoteStep4" class="quote-step-content" style="display: none;">
+                    <div class="form-section">
+                        <h2>4️⃣ Villkor & Serviceavtal</h2>
+
+                        <div class="form-group">
+                            <label>Projektspecifika villkor</label>
+                            <textarea id="quoteTerms" placeholder="T.ex. Systemet är lokalt och behöver kompletteras..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kundrabatt (%)</label>
+                            <input type="number" id="quoteDiscount" value="0" min="0" max="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Extra rabatt (beskrivning)</label>
+                            <input type="text" id="quoteExtraDiscountDesc" placeholder="T.ex. 40% rabatt på taggar">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Extra rabatt (belopp kr)</label>
+                            <input type="number" id="quoteExtraDiscountAmount" value="0" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Säkerhetsrådgivare</label>
+                            <select id="quoteAdvisor">
+                                <option value="Marcus Wänerskog">Marcus Wänerskog</option>
+                                <option value="Pekka">Pekka</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Visa serviceavtal i offert?</label>
+                            <select id="quoteShowService">
+                                <option value="yes">Ja</option>
+                                <option value="no">Nej</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <button class="btn btn-primary" onclick="goToQuoteStep(5)">Nästa: Granska →</button>
+                            <button class="btn btn-secondary" onclick="goToQuoteStep(3)">← Tillbaka</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Summary -->
+                <div id="quoteStep5" class="quote-step-content" style="display: none;">
+                    <div class="form-section">
+                        <h2>5️⃣ Sammanfattning</h2>
+                        
+                        <div id="quoteSummaryContent">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <button class="btn btn-success" onclick="saveQuote()">💾 Spara offert</button>
+                            <button class="btn btn-primary" onclick="generateQuotePDF()">📄 Generera PDF-Offert</button>
+                            <button class="btn btn-secondary" onclick="goToQuoteStep(4)">← Tillbaka</button>
+                            <button class="btn btn-danger" onclick="showView('dashboard')">Avbryt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER MODAL -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lägg till / Redigera kund</h2>
+                <button class="modal-close" onclick="closeCustomerModal()">✕ Stäng</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Kundnummer *</label>
+                    <input type="text" id="modalCustomerNumber" placeholder="Genereras automatiskt" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Företagsnamn *</label>
+                    <input type="text" id="modalCustomerName" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Organisationsnummer *</label>
+                    <input type="text" id="modalCustomerOrg" placeholder="XXXXXX-XXXX" required>
+                </div>
+                <div class="form-group">
+                    <label>Kontaktperson</label>
+                    <input type="text" id="modalCustomerContact">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Telefon</label>
+                    <input type="tel" id="modalCustomerPhone">
+                </div>
+                <div class="form-group">
+                    <label>E-post</label>
+                    <input type="email" id="modalCustomerEmail">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Adress</label>
+                    <input type="text" id="modalCustomerAddress">
+                </div>
+                <div class="form-group">
+                    <label>Postnummer</label>
+                    <input type="text" id="modalCustomerZip">
+                </div>
+                <div class="form-group">
+                    <label>Ort</label>
+                    <input type="text" id="modalCustomerCity">
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="saveCustomer()">💾 Spara kund</button>
+        </div>
+    </div>
+
+    <!-- PRODUCT MODAL -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lägg till / Redigera produkt</h2>
+                <button class="modal-close" onclick="closeProductModal()">✕ Stäng</button>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Artikelnummer / SKU *</label>
+                    <input type="text" id="modalProductArticle" required>
+                </div>
+                <div class="form-group">
+                    <label>Benämning *</label>
+                    <input type="text" id="modalProductName" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Kategori *</label>
+                    <select id="modalProductCategory">
+                        <option value="lasare">Läsare</option>
+                        <option value="centralapparater">Centralapparater</option>
+                        <option value="tillbehor">Tillbehör</option>
+                        <option value="ellas">Ellås</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pris (kr) *</label>
+                    <input type="number" id="modalProductPrice" min="0" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Leverantör</label>
+                    <input type="text" id="modalProductSupplier">
+                </div>
+                <div class="form-group">
+                    <label>Rabattgrupp</label>
+                    <input type="text" id="modalProductRabatt">
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="saveProduct()">💾 Spara produkt</button>
+            <input type="hidden" id="modalProductIndex">
+            <input type="hidden" id="modalProductCat">
+        </div>
+    </div>
+
+    <script src="product_database.js"></script>
+    <script src="app_v3.js"></script>
+</body>
+</html>

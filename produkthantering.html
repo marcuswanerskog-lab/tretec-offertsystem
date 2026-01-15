@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tretec Larm - Produkthantering</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gold: #C9A227;
+            --dark-bg: #1a1a1a;
+            --light-bg: #f5f5f5;
+            --text-dark: #333;
+            --border-color: #ddd;
+            --success-green: #4CAF50;
+            --error-red: #f44336;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #2d2d2d 100%);
+            color: white;
+            padding: 40px;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            background: var(--primary-gold);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: #b8911f;
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .pm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, #b8911f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .pm-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .pm-search {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .pm-filter {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #b8911f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201,162,39,0.3);
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .product-table th {
+            background: var(--dark-bg);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .product-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .product-table tr:hover {
+            background: var(--light-bg);
+        }
+
+        .pm-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pm-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .pm-btn-edit {
+            background: #2196F3;
+            color: white;
+        }
+
+        .pm-btn-edit:hover {
+            background: #1976D2;
+        }
+
+        .pm-btn-delete {
+            background: var(--error-red);
+            color: white;
+        }
+
+        .pm-btn-delete:hover {
+            background: #d32f2f;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .form-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .product-table {
+                font-size: 14px;
+            }
+
+            .product-table th,
+            .product-table td {
+                padding: 8px;
+            }
+
+            .pm-controls {
+                flex-direction: column;
+            }
+
+            .pm-search {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Tretec Larm AB</h1>
+                <p class="subtitle">Produkthantering</p>
+            </div>
+            <a href="offertsystem.html" class="back-link">← Tillbaka till Offertsystem</a>
+        </div>
+
+        <div class="content">
+            <div class="pm-header">
+                <h2>Produktdatabas</h2>
+                <button class="btn btn-primary" onclick="openAddProductModal()">
+                    ➕ Lägg till produkt
+                </button>
+            </div>
+
+            <!-- Statistik -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalProducts">0</h3>
+                    <p>Totalt produkter</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalCategories">0</h3>
+                    <p>Kategorier</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="avgPrice">0</h3>
+                    <p>Medelpris (kr)</p>
+                </div>
+            </div>
+
+            <!-- Alert-meddelanden -->
+            <div id="alertContainer"></div>
+
+            <!-- Kontroller -->
+            <div class="pm-controls">
+                <input type="text" class="pm-search" id="productSearch" placeholder="🔍 Sök produkt (namn, SKU, artikelnr)...">
+                <select class="pm-filter" id="categoryFilter" onchange="filterProducts()">
+                    <option value="">Alla kategorier</option>
+                </select>
+                <button class="btn btn-secondary" onclick="exportDatabase()">
+                    💾 Exportera databas
+                </button>
+                <button class="btn btn-secondary" onclick="importDatabase()">
+                    📤 Importera databas
+                </button>
+            </div>
+
+            <!-- Produkttabell -->
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Artikelnr/SKU</th>
+                        <th>Benämning</th>
+                        <th>Kategori</th>
+                        <th>Pris (kr)</th>
+                        <th>Leverantör</th>
+                        <th>Åtgärder</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <!-- Fylls dynamiskt -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL: Lägg till/Redigera produkt -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Lägg till produkt</h2>
+                <button class="modal-close" onclick="closeProductModal()">×</button>
+            </div>
+            
+            <form id="productForm" onsubmit="saveProduct(event)">
+                <input type="hidden" id="editIndex">
+                <input type="hidden" id="editCategory">
+                
+                <div class="form-group">
+                    <label for="productName">Benämning *</label>
+                    <input type="text" id="productName" required placeholder="T.ex. Dörrstängare premium">
+                </div>
+
+                <div class="form-group">
+                    <label for="productArticle">Artikelnummer/SKU</label>
+                    <input type="text" id="productArticle" placeholder="T.ex. DOOR-001">
+                </div>
+
+                <div class="form-group">
+                    <label for="productCategory">Kategori *</label>
+                    <select id="productCategory" required>
+                        <!-- Fylls dynamiskt -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="productPrice">Nettopris (kr) *</label>
+                    <input type="number" id="productPrice" required min="0" step="0.01" placeholder="1700">
+                </div>
+
+                <div class="form-group">
+                    <label for="productSupplier">Leverantör</label>
+                    <input type="text" id="productSupplier" placeholder="T.ex. Låsgiganten">
+                </div>
+
+                <div class="form-group">
+                    <label for="productURL">URL (länk till produkt)</label>
+                    <input type="url" id="productURL" placeholder="https://...">
+                </div>
+
+                <div class="form-group">
+                    <label for="productRabatt">Rabattgrupp</label>
+                    <select id="productRabatt">
+                        <option value="">Ingen rabattgrupp</option>
+                        <option value="V">V - VAKA</option>
+                        <option value="E">E - Ellås</option>
+                        <option value="F">F - Fermax</option>
+                        <option value="T">T - Tillbehör</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="productCanDiscount" checked>
+                        Tillåt individuell rabatt på denna produkt
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Avbryt</button>
+                    <button type="submit" class="btn btn-primary">💾 Spara produkt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dold fil-input för import -->
+    <input type="file" id="importFile" accept=".js,.json" style="display: none;" onchange="handleImportFile(event)">
+
+    <script src="product_database.js"></script>
+    <script>
+        let currentDatabase = null;
+
+        // LADDA PRODUKTER
+        function loadProducts() {
+            if (typeof PRODUCT_DB === 'undefined') {
+                showAlert('Kunde inte ladda produktdatabasen!', 'error');
+                return;
+            }
+
+            currentDatabase = JSON.parse(JSON.stringify(PRODUCT_DB));
+            updateStats();
+            updateCategoryFilter();
+            renderProducts();
+        }
+
+        // UPPDATERA STATISTIK
+        function updateStats() {
+            let totalProducts = 0;
+            let totalPrice = 0;
+            const categories = Object.keys(currentDatabase);
+
+            categories.forEach(cat => {
+                const products = currentDatabase[cat];
+                totalProducts += products.length;
+                products.forEach(p => totalPrice += p.pris || 0);
+            });
+
+            document.getElementById('totalProducts').textContent = totalProducts;
+            document.getElementById('totalCategories').textContent = categories.length;
+            document.getElementById('avgPrice').textContent = totalProducts > 0 
+                ? Math.round(totalPrice / totalProducts) 
+                : 0;
+        }
+
+        // UPPDATERA KATEGORIFILTER
+        function updateCategoryFilter() {
+            const filter = document.getElementById('categoryFilter');
+            const categories = Object.keys(currentDatabase);
+            
+            filter.innerHTML = '<option value="">Alla kategorier</option>';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                filter.appendChild(option);
+            });
+        }
+
+        // RENDERA PRODUKTER
+        function renderProducts() {
+            const tbody = document.getElementById('productTableBody');
+            const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            tbody.innerHTML = '';
+            let count = 0;
+
+            Object.keys(currentDatabase).forEach(category => {
+                if (categoryFilter && category !== categoryFilter) return;
+
+                currentDatabase[category].forEach((product, index) => {
+                    const searchText = `${product.benamning} ${product.artikelnummer || ''} ${product.sku || ''}`.toLowerCase();
+                    if (searchTerm && !searchText.includes(searchTerm)) return;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${product.artikelnummer || product.sku || '-'}</td>
+                        <td>${product.benamning}</td>
+                        <td>${category}</td>
+                        <td>${product.pris ? product.pris.toLocaleString('sv-SE') : '-'}</td>
+                        <td>${product.supplier || '-'}</td>
+                        <td class="pm-actions">
+                            <button class="pm-btn pm-btn-edit" onclick="editProduct('${category}', ${index})">✏️ Redigera</button>
+                            <button class="pm-btn pm-btn-delete" onclick="deleteProduct('${category}', ${index})">🗑️ Ta bort</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                    count++;
+                });
+            });
+
+            if (count === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px;">Inga produkter hittades</td></tr>';
+            }
+        }
+
+        // SÖK-HANTERING
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('productSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', renderProducts);
+            }
+            loadProducts();
+        });
+
+        // FILTRERA PRODUKTER
+        function filterProducts() {
+            renderProducts();
+        }
+
+        // ÖPPNA MODAL FÖR NY PRODUKT
+        function openAddProductModal() {
+            document.getElementById('modalTitle').textContent = 'Lägg till ny produkt';
+            document.getElementById('productForm').reset();
+            document.getElementById('editIndex').value = '';
+            document.getElementById('editCategory').value = '';
+            
+            const categorySelect = document.getElementById('productCategory');
+            categorySelect.innerHTML = '';
+            Object.keys(currentDatabase).forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                categorySelect.appendChild(option);
+            });
+
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        // REDIGERA PRODUKT
+        function editProduct(category, index) {
+            const product = currentDatabase[category][index];
+            
+            document.getElementById('modalTitle').textContent = 'Redigera produkt';
+            document.getElementById('editIndex').value = index;
+            document.getElementById('editCategory').value = category;
+            
+            document.getElementById('productName').value = product.benamning || '';
+            document.getElementById('productArticle').value = product.artikelnummer || product.sku || '';
+            document.getElementById('productPrice').value = product.pris || '';
+            document.getElementById('productSupplier').value = product.supplier || '';
+            document.getElementById('productURL').value = product.url || '';
+            document.getElementById('productRabatt').value = product.rabattgrupp || '';
+            document.getElementById('productCanDiscount').checked = product.canDiscount !== false;
+
+            const categorySelect = document.getElementById('productCategory');
+            categorySelect.innerHTML = '';
+            Object.keys(currentDatabase).forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                option.selected = cat === category;
+                categorySelect.appendChild(option);
+            });
+
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        // SPARA PRODUKT
+        function saveProduct(event) {
+            event.preventDefault();
+
+            const product = {
+                benamning: document.getElementById('productName').value,
+                artikelnummer: document.getElementById('productArticle').value || '',
+                pris: parseFloat(document.getElementById('productPrice').value),
+                supplier: document.getElementById('productSupplier').value || '',
+                url: document.getElementById('productURL').value || '',
+                rabattgrupp: document.getElementById('productRabatt').value || '',
+                canDiscount: document.getElementById('productCanDiscount').checked,
+                e_nummer: '',
+                lagsta_orderantal: null
+            };
+
+            const category = document.getElementById('productCategory').value;
+            const editIndex = document.getElementById('editIndex').value;
+            const editCategory = document.getElementById('editCategory').value;
+
+            if (editIndex !== '') {
+                if (editCategory === category) {
+                    currentDatabase[category][editIndex] = product;
+                } else {
+                    currentDatabase[editCategory].splice(editIndex, 1);
+                    if (!currentDatabase[category]) currentDatabase[category] = [];
+                    currentDatabase[category].push(product);
+                }
+                showAlert('Produkt uppdaterad!', 'success');
+            } else {
+                if (!currentDatabase[category]) currentDatabase[category] = [];
+                currentDatabase[category].push(product);
+                showAlert('Produkt tillagd!', 'success');
+            }
+
+            closeProductModal();
+            updateStats();
+            renderProducts();
+        }
+
+        // TA BORT PRODUKT
+        function deleteProduct(category, index) {
+            if (!confirm('Är du säker på att du vill ta bort denna produkt?')) return;
+
+            currentDatabase[category].splice(index, 1);
+            
+            if (currentDatabase[category].length === 0) {
+                delete currentDatabase[category];
+            }
+
+            showAlert('Produkt borttagen!', 'success');
+            updateStats();
+            updateCategoryFilter();
+            renderProducts();
+        }
+
+        // STÄNG MODAL
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        // VISA ALERT
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.appendChild(alert);
+
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        // EXPORTERA DATABAS
+        function exportDatabase() {
+            const dataStr = `// Product Database - Updated ${new Date().toISOString().split('T')[0]}\nconst PRODUCT_DB = ${JSON.stringify(currentDatabase, null, 2)};`;
+            const dataBlob = new Blob([dataStr], { type: 'application/javascript' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `product_database_${Date.now()}.js`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showAlert('Databas exporterad! Byt namn till product_database.js och ersätt den gamla filen.', 'success');
+        }
+
+        // IMPORTERA DATABAS
+        function importDatabase() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    const match = content.match(/PRODUCT_DB\s*=\s*({[\s\S]*?});/);
+                    if (match) {
+                        currentDatabase = JSON.parse(match[1]);
+                        loadProducts();
+                        showAlert('Databas importerad!', 'success');
+                    } else {
+                        throw new Error('Kunde inte hitta PRODUCT_DB i filen');
+                    }
+                } catch (error) {
+                    showAlert('Fel vid import: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
