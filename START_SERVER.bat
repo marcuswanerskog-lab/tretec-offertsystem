@@ -30,6 +30,6 @@ echo Tryck Ctrl+C för att stoppa servern
 echo ====================================
 echo.
 
-python server.py
+python server_v3.py
 
 pause

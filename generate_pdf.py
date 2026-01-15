@@ -225,8 +225,8 @@ class TretecQuoteGenerator:
             # Create table data
             table_data = []
             for product in products:
-                qty = product['quantity']
-                name = product['benamning']
+                qty = product.get('quantity', 1)
+                name = product.get('benamning') or product.get('name', 'N/A')
                 
                 # Description if available (truncated for space)
                 desc = product.get('description', '')
@@ -257,29 +257,121 @@ class TretecQuoteGenerator:
         return elements
     
     def create_services_section(self):
-        """Create services section with hour-based calculations"""
+        """Create services section - show as simple list with amounts"""
         elements = []
         
-        services_with_amount = [s for s in self.data['services'] if s['amount'] > 0]
+        services_with_amount = [s for s in self.data['services'] if s.get('amount', 0) > 0]
         if not services_with_amount:
             return elements
         
+        # Create a simple table for services
+        service_data = []
         for service in services_with_amount:
-            if service.get('hours') and service.get('rate'):
-                # Hour-based service
-                elements.append(Paragraph(
-                    f"<b>1</b> {service['name']}<br/>"
-                    f"<font size=9>{service['hours']} timmar × {self.format_price(service['rate'])} kr/tim = {self.format_price(service['amount'])} kr</font>",
-                    self.styles['TretecBody']
-                ))
-            else:
-                # Fixed amount service
-                elements.append(Paragraph(f"<b>1</b> {service['name']}", self.styles['TretecBody']))
+            amount = service.get('amount', 0)
+            service_name = service.get('name', 'Tjänst')
+            
+            service_data.append([
+                '1',
+                service_name,
+                f"{self.format_price(amount)} kr"
+            ])
+        
+        if service_data:
+            service_table = Table(service_data, colWidths=[30, 350, 120])
+            service_table.setStyle(TableStyle([
+                ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+                ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ]))
+            
+            elements.append(service_table)
+            elements.append(Spacer(1, 5*mm))
+        
+        return elements
+        
+        for service in services_with_amount:
+            # Show service name and total amount ONLY - no hours or rates visible
+            amount = service.get('amount', 0)
+            service_name = service.get('name', 'Tjänst')
+            
+            elements.append(Paragraph(
+                f"<b>1</b> {service_name}",
+                self.styles['TretecBody']
+            ))
+            elements.append(Spacer(1, 1*mm))
+            
+            # Show amount on separate line for clarity
+            elements.append(Paragraph(
+                f"<font size=10>{self.format_price(amount)} kr</font>",
+                self.styles['TretecBody']
+            ))
             elements.append(Spacer(1, 3*mm))
         
         return elements
     
     def create_summary(self):
+        """Create pricing summary"""
+        elements = []
+        calc = self.data['calculations']
+        
+        elements.append(Paragraph("<b>Prissammanfattning</b>", self.styles['TretecHeading']))
+        elements.append(Spacer(1, 3*mm))
+        
+        # Create summary table
+        summary_data = []
+        
+        # Products subtotal
+        if calc.get('subtotal', 0) > 0:
+            summary_data.append(['Material och produkter:', f"{self.format_price(calc['subtotal'])} kr"])
+        
+        # Services subtotal
+        if calc.get('servicesTotal', 0) > 0:
+            summary_data.append(['Arbete och tjänster:', f"{self.format_price(calc['servicesTotal'])} kr"])
+        
+        # Subtotal
+        summary_data.append(['Summa före rabatt:', f"{self.format_price(calc.get('totalBeforeDiscount', 0))} kr"])
+        
+        # Discount if applicable
+        if self.data.get('discount', 0) > 0:
+            summary_data.append([
+                f"Kundrabatt ({self.data['discount']}%):",
+                f"-{self.format_price(calc.get('discountAmount', 0))} kr"
+            ])
+        
+        # Extra discount if applicable
+        if calc.get('extraDiscountAmount', 0) > 0 and self.data.get('extra_discount', {}).get('text'):
+            summary_data.append([
+                f"{self.data['extra_discount']['text']}:",
+                f"-{self.format_price(calc['extraDiscountAmount'])} kr"
+            ])
+        
+        # Empty row and total
+        summary_data.append(['', ''])
+        summary_data.append([
+            'TOTALT PRIS INVESTERING',
+            f"{self.format_price(calc.get('grandTotal', 0))} kr"
+        ])
+        
+        # Create table
+        table = Table(summary_data, colWidths=[350, 150])
+        table.setStyle(TableStyle([
+            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, -1), (-1, -1), 14),
+            ('TEXTCOLOR', (1, -1), (1, -1), colors.HexColor('#C9A227')),
+            ('LINEABOVE', (0, -2), (-1, -2), 2, colors.HexColor('#C9A227')),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ]))
+        
+        elements.append(table)
+        elements.append(Spacer(1, 8*mm))
+        
+        return elements
+    def create_terms(self):
         """Create pricing summary"""
         elements = []
         calc = self.data['calculations']

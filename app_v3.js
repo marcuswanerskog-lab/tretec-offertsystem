@@ -1,5 +1,74 @@
 // Tretec Larm - Offertsystem V3.0
 // Global state
+
+// ==================== NOTIFICATION SYSTEM ====================
+
+function showNotification(message, type = 'info') {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        max-width: 400px;
+    `;
+    
+    switch(type) {
+        case 'success':
+            notification.style.background = '#4CAF50';
+            notification.style.color = 'white';
+            break;
+        case 'error':
+            notification.style.background = '#f44336';
+            notification.style.color = 'white';
+            break;
+        case 'warning':
+            notification.style.background = '#ff9800';
+            notification.style.color = 'white';
+            break;
+        default:
+            notification.style.background = '#2196F3';
+            notification.style.color = 'white';
+    }
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
+
+// Add animation styles
+if (!document.querySelector('#notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+
 let customers = [];
 let quotes = [];
 let currentQuote = {};
@@ -8,8 +77,8 @@ let editingCustomerIndex = null;
 let editingProductIndex = null;
 
 // Product database - will be loaded from product_database.js
-// Don't declare it here, use the global one
-let PRODUCT_DB = window.PRODUCT_DB || {};
+// DON'T declare it here - use the one from product_database.js
+// let PRODUCT_DB = window.PRODUCT_DB || {}; // ❌ REMOVED - This was causing the error
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -75,9 +144,6 @@ function loadProductDatabase() {
             console.log(`   - ${cat}: ${count} produkter`);
         });
         console.log(`📊 Total products: ${totalProducts}`);
-        
-        // Use the global one
-        PRODUCT_DB = window.PRODUCT_DB;
         return;
     }
     
@@ -85,25 +151,22 @@ function loadProductDatabase() {
     console.warn('⚠️ Product database not found in product_database.js. Trying localStorage...');
     const savedProducts = localStorage.getItem('tretec_products');
     if (savedProducts) {
-        PRODUCT_DB = JSON.parse(savedProducts);
-        window.PRODUCT_DB = PRODUCT_DB;
+        window.PRODUCT_DB = JSON.parse(savedProducts);
         console.log('✅ Product database loaded from localStorage');
     } else {
         // Initialize with empty categories
         console.warn('⚠️ No products found. Initializing empty database.');
-        PRODUCT_DB = {
+        window.PRODUCT_DB = {
             lasare: [],
             centralapparater: [],
             tillbehor: [],
             ellas: []
         };
-        window.PRODUCT_DB = PRODUCT_DB;
     }
 }
 
 function saveProductDatabase() {
-    localStorage.setItem('tretec_products', JSON.stringify(PRODUCT_DB));
-    window.PRODUCT_DB = PRODUCT_DB; // Keep in sync
+    localStorage.setItem('tretec_products', JSON.stringify(window.PRODUCT_DB));
 }
 
 // ==================== NAVIGATION ====================
@@ -338,7 +401,7 @@ function selectCustomer(customerNumber) {
 
 function openProductModal(category = null, index = null) {
     if (category !== null && index !== null) {
-        const product = PRODUCT_DB[category][index];
+        const product = window.PRODUCT_DB[category][index];
         document.getElementById('modalProductArticle').value = product.artikelnummer || product.sku || '';
         document.getElementById('modalProductName').value = product.benamning || product.name || '';
         document.getElementById('modalProductCategory').value = category;
@@ -394,18 +457,18 @@ function saveProduct() {
     if (oldCat && index) {
         // Editing existing
         if (oldCat === category) {
-            PRODUCT_DB[category][parseInt(index)] = product;
+            window.PRODUCT_DB[category][parseInt(index)] = product;
         } else {
             // Category changed
-            PRODUCT_DB[oldCat].splice(parseInt(index), 1);
-            if (!PRODUCT_DB[category]) PRODUCT_DB[category] = [];
-            PRODUCT_DB[category].push(product);
+            window.PRODUCT_DB[oldCat].splice(parseInt(index), 1);
+            if (!window.PRODUCT_DB[category]) window.PRODUCT_DB[category] = [];
+            window.PRODUCT_DB[category].push(product);
         }
         showAlert('Produkt uppdaterad!', 'success');
     } else {
         // Adding new
-        if (!PRODUCT_DB[category]) PRODUCT_DB[category] = [];
-        PRODUCT_DB[category].push(product);
+        if (!window.PRODUCT_DB[category]) window.PRODUCT_DB[category] = [];
+        window.PRODUCT_DB[category].push(product);
         showAlert('Produkt tillagd!', 'success');
     }
     
@@ -417,9 +480,9 @@ function saveProduct() {
 
 function deleteProduct(category, index) {
     if (confirm('Är du säker på att du vill ta bort denna produkt?')) {
-        PRODUCT_DB[category].splice(index, 1);
-        if (PRODUCT_DB[category].length === 0) {
-            delete PRODUCT_DB[category];
+        window.PRODUCT_DB[category].splice(index, 1);
+        if (window.PRODUCT_DB[category].length === 0) {
+            delete window.PRODUCT_DB[category];
         }
         saveProductDatabase();
         renderProducts();
@@ -435,7 +498,7 @@ function renderProducts() {
     tbody.innerHTML = '';
     
     // Update category filter
-    const categories = Object.keys(PRODUCT_DB);
+    const categories = Object.keys(window.PRODUCT_DB);
     categoryFilter.innerHTML = '<option value="">Alla kategorier</option>';
     categories.forEach(cat => {
         const option = document.createElement('option');
@@ -445,8 +508,8 @@ function renderProducts() {
     });
     
     // Render products
-    Object.keys(PRODUCT_DB).forEach(category => {
-        PRODUCT_DB[category].forEach((product, index) => {
+    Object.keys(window.PRODUCT_DB).forEach(category => {
+        window.PRODUCT_DB[category].forEach((product, index) => {
             const row = document.createElement('tr');
             row.dataset.category = category;
             row.innerHTML = `
@@ -483,21 +546,99 @@ function filterProducts() {
 
 // ==================== QUOTE - PRODUCTS ====================
 
+
+// ==================== QUICK ACCESS PRODUCTS ====================
+
+const QUICK_ACCESS_PRODUCTS = {
+    'A76 läsare': { category: 'lasare', search: 'a76', name: 'Porttelefon A76' },
+    'A45i läsare': { category: 'lasare', search: 'a45i', name: 'Läsare VAKA A45i' },
+    'B18 central': { category: 'centralapparater', search: 'b18', name: 'Dörrcentral VAKA B18' },
+    'B28 central': { category: 'centralapparater', search: 'b28', name: 'Dörrcentral VAKA B28' },
+    'PoE-switch': { category: 'tillbehor', search: 'poe switch', name: 'PoE-switch 4 plus' },
+    'Taggar': { category: 'tillbehor', search: 'tagg', name: 'Taggar' },
+    'Batterier': { category: 'tillbehor', search: 'batteri', name: 'Batterier' }
+};
+
+function renderQuickAccessButtons() {
+    const container = document.getElementById('productCategories');
+    
+    // Create quick access section at the top
+    const quickSection = document.createElement('div');
+    quickSection.className = 'quick-access-section';
+    quickSection.style.cssText = 'background: linear-gradient(135deg, #C9A227 0%, #b8911f 100%); padding: 20px; border-radius: 8px; margin-bottom: 20px;';
+    
+    quickSection.innerHTML = `
+        <h3 style="color: white; margin-bottom: 15px; font-size: 1.3em;">⚡ Snabbval - Vanliga produkter</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            ${Object.entries(QUICK_ACCESS_PRODUCTS).map(([name, data]) => `
+                <button 
+                    class="quick-btn" 
+                    onclick="quickAddProduct('${data.category}', '${data.search}')"
+                    style="background: white; color: #1a1a1a; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1em; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"
+                    onmouseover="this.style.background='#f0f0f0'; this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='white'; this.style.transform='translateY(0)'"
+                >
+                    ${name}
+                </button>
+            `).join('')}
+        </div>
+        <p style="color: white; margin-top: 10px; font-size: 0.9em; opacity: 0.9;">
+            💡 Tips: Klicka för att snabbt hitta och lägga till produkten
+        </p>
+    `;
+    
+    container.insertBefore(quickSection, container.firstChild);
+}
+
+function quickAddProduct(category, searchTerm) {
+    // Open the category if closed
+    const content = document.getElementById(`catContent_${category}`);
+    const arrow = document.getElementById(`catArrow_${category}`);
+    
+    if (!content.classList.contains('open')) {
+        content.classList.add('open');
+        arrow.textContent = '▲';
+    }
+    
+    // Set the search field
+    const searchInput = document.getElementById(`search_${category}`);
+    if (searchInput) {
+        searchInput.value = searchTerm;
+        searchInput.focus();
+        
+        // Trigger the filter
+        filterCategoryProducts(category, searchTerm);
+        
+        // Scroll to the category
+        content.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Highlight the search field briefly
+        searchInput.style.border = '3px solid #4CAF50';
+        setTimeout(() => {
+            searchInput.style.border = '2px solid #ddd';
+        }, 1500);
+    }
+}
+
+
 function renderProductCategories() {
     const container = document.getElementById('productCategories');
     container.innerHTML = '';
     
-    console.log('🔍 Rendering product categories...');
-    console.log('PRODUCT_DB:', PRODUCT_DB);
-    console.log('Categories:', Object.keys(PRODUCT_DB));
+    // Render quick access buttons first
+    renderQuickAccessButtons();
     
-    Object.keys(PRODUCT_DB).forEach(category => {
-        if (PRODUCT_DB[category].length === 0) {
+    console.log('🔍 Rendering product categories...');
+    console.log('PRODUCT_DB:', window.PRODUCT_DB);
+    console.log('Categories:', Object.keys(window.PRODUCT_DB));
+    
+    Object.keys(window.PRODUCT_DB).forEach(category => {
+        if (window.PRODUCT_DB[category].length === 0) {
             console.log(`⚠️ Category '${category}' is empty, skipping...`);
             return;
         }
         
-        console.log(`✅ Rendering category '${category}' with ${PRODUCT_DB[category].length} products`);
+        console.log(`✅ Rendering category '${category}' with ${window.PRODUCT_DB[category].length} products`);
         
         const categorySection = document.createElement('div');
         categorySection.className = 'category-section';
@@ -506,10 +647,20 @@ function renderProductCategories() {
         
         categorySection.innerHTML = `
             <div class="category-header" onclick="toggleCategory('${category}')">
-                <span>${categoryName} (${PRODUCT_DB[category].length} produkter)</span>
+                <span>${categoryName} (${window.PRODUCT_DB[category].length} produkter)</span>
                 <span id="catArrow_${category}">▼</span>
             </div>
             <div class="category-content" id="catContent_${category}">
+                <div style="padding: 10px; background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                    <input 
+                        type="text" 
+                        id="search_${category}" 
+                        class="category-search"
+                        placeholder="🔍 Sök i ${categoryName}... (t.ex. 76, A45, B28)"
+                        style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em;"
+                        oninput="filterCategoryProducts('${category}', this.value)"
+                    >
+                </div>
                 <div id="products_${category}"></div>
             </div>
         `;
@@ -518,9 +669,10 @@ function renderProductCategories() {
         
         // Render products in category
         const productsDiv = document.getElementById(`products_${category}`);
-        PRODUCT_DB[category].forEach((product, index) => {
+        window.PRODUCT_DB[category].forEach((product, index) => {
             const productDiv = document.createElement('div');
             productDiv.className = 'product-item';
+            productDiv.dataset.search = `${product.artikelnummer} ${product.benamning}`.toLowerCase();
             productDiv.onclick = () => toggleProductSelection(category, index);
             
             const isSelected = selectedProducts.some(p => 
@@ -541,6 +693,38 @@ function renderProductCategories() {
             productsDiv.appendChild(productDiv);
         });
     });
+}
+
+
+
+function filterCategoryProducts(category, searchTerm) {
+    const productsDiv = document.getElementById(`products_${category}`);
+    const productItems = productsDiv.querySelectorAll('.product-item');
+    const term = searchTerm.toLowerCase().trim();
+    
+    let visibleCount = 0;
+    
+    productItems.forEach(item => {
+        const searchData = item.dataset.search;
+        if (!term || searchData.includes(term)) {
+            item.style.display = 'flex';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Update category header with visible count
+    const header = document.querySelector(`#catArrow_${category}`).parentElement;
+    const originalText = header.querySelector('span:first-child').textContent;
+    const baseText = originalText.split('(')[0].trim();
+    const totalCount = window.PRODUCT_DB[category].length;
+    
+    if (term && visibleCount < totalCount) {
+        header.querySelector('span:first-child').textContent = `${baseText} (${visibleCount} av ${totalCount} produkter)`;
+    } else {
+        header.querySelector('span:first-child').textContent = `${baseText} (${totalCount} produkter)`;
+    }
 }
 
 function toggleCategory(category) {
@@ -566,7 +750,7 @@ function toggleProductSelection(category, index) {
         selectedProducts.splice(existingIndex, 1);
     } else {
         // Add
-        const product = PRODUCT_DB[category][index];
+        const product = window.PRODUCT_DB[category][index];
         selectedProducts.push({
             category: category,
             index: index,
@@ -1027,8 +1211,8 @@ function updateStats() {
     document.getElementById('statsCustomers').textContent = customers.length;
     
     let productCount = 0;
-    Object.keys(PRODUCT_DB).forEach(cat => {
-        productCount += PRODUCT_DB[cat].length;
+    Object.keys(window.PRODUCT_DB).forEach(cat => {
+        productCount += window.PRODUCT_DB[cat].length;
     });
     document.getElementById('statsProducts').textContent = productCount;
 }
@@ -1051,6 +1235,113 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
+
+// ==================== SAVE CUSTOMER ====================
+
+async function saveCustomerIfNeeded(customerData) {
+    console.log('👤 Checking if customer needs to be saved...', customerData);
+    
+    if (!customerData.orgNumber && !customerData.name) {
+        console.log('⚠️ No customer data to save');
+        return true;
+    }
+    
+    try {
+        let customers = JSON.parse(localStorage.getItem('customers') || '[]');
+        
+        const existingIndex = customers.findIndex(c => 
+            (customerData.orgNumber && c.orgNumber === customerData.orgNumber) ||
+            (c.name === customerData.name)
+        );
+        
+        if (existingIndex >= 0) {
+            customers[existingIndex] = {
+                ...customers[existingIndex],
+                ...customerData,
+                updatedAt: new Date().toISOString()
+            };
+            console.log('📝 Updated existing customer:', customerData.name);
+        } else {
+            const newCustomer = {
+                ...customerData,
+                id: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+            customers.push(newCustomer);
+            console.log('✨ Created new customer:', customerData.name);
+        }
+        
+        localStorage.setItem('customers', JSON.stringify(customers));
+        
+        if (typeof loadCustomers === 'function') {
+            loadCustomers();
+        }
+        
+        return true;
+        
+    } catch (error) {
+        console.error('Error saving customer:', error);
+        return false;
+    }
+}
+
+
+
+// ==================== GENERATE CONTRACT ====================
+
+async function generateContract() {
+    console.log('📄 Starting contract generation...');
+    
+    console.log('💾 Auto-saving quote before contract generation...');
+    const saveResult = await saveQuote();
+    
+    if (!saveResult) {
+        showNotification('Kunde inte spara offerten innan avtalsgenererering', 'error');
+        return;
+    }
+    
+    console.log('✅ Quote auto-saved successfully');
+    
+    const quoteData = gatherQuoteData();
+    
+    if (!quoteData.customer.name || !quoteData.customer.orgNumber) {
+        showNotification('Fyll i kunduppgifter först', 'error');
+        return;
+    }
+    
+    if (selectedProducts.length === 0) {
+        showNotification('Lägg till minst en produkt', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/generate-contract', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(quoteData)
+        });
+        
+        if (!response.ok) throw new Error('Contract generation failed');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Avtal_${quoteData.customer.name.replace(/ /g, '_')}_${quoteData.date}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showNotification('✅ Affärsavtal genererat och sparat!', 'success');
+        
+    } catch (error) {
+        console.error('Contract generation error:', error);
+        showNotification('Kunde inte generera avtal: ' + error.message, 'error');
+    }
+}
 
 // ==================== EXPOSE FUNCTIONS GLOBALLY ====================
 // Make all functions called from HTML globally accessible
@@ -1075,6 +1366,10 @@ window.updateProductQuantity = updateProductQuantity;
 window.updateProductDiscount = updateProductDiscount;
 window.removeSelectedProduct = removeSelectedProduct;
 window.filterQuoteProducts = filterQuoteProducts;
+window.filterCategoryProducts = filterCategoryProducts;
+window.quickAddProduct = quickAddProduct;
+window.saveCustomerIfNeeded = saveCustomerIfNeeded;
+window.generateContract = generateContract;
 window.calculateServiceTotals = calculateServiceTotals;
 window.saveQuote = saveQuote;
 window.generateQuotePDF = generateQuotePDF;
